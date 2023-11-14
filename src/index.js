@@ -2,6 +2,7 @@ require('dotenv').config()
 const express = require("express");
 const path = require("path");
 const connectDB = require("./db/mongoose");
+const client = require("prom-client");
 
 const app = express();
 
@@ -20,6 +21,7 @@ const start = async () => {
 		const showtimeRouter = require("./routes/showtime");
 		const reservationRouter = require("./routes/reservation");
 		const invitationsRouter = require("./routes/invitations");
+
 
 		app.disable("x-powered-by");
 		const port = process.env.PORT || 8080;
@@ -53,6 +55,11 @@ const start = async () => {
 		app.use(showtimeRouter);
 		app.use(reservationRouter);
 		app.use(invitationsRouter);
+
+		app.get("/metrics", async (req, res) => {
+			res.set("Content-Type", client.register.contentType);
+			return res.send(await client.register.metrics());
+		  });
 
 		app.get("/health", (req, res) => {
 			res.send({ "API Server": "OK" });
